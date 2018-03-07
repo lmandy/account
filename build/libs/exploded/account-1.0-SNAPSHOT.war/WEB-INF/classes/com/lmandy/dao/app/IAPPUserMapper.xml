@@ -1,0 +1,19 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!DOCTYPE mapper
+        PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.lmandy.dao.app.IAPPUserMapper">
+
+    <insert id="add" parameterType="com.lmandy.bean.AccountUser" useGeneratedKeys="true" keyProperty="id">
+        INSERT INTO account_user VALUES (NULL,#{userName},#{passWord},#{token},#{portrait},NOW())
+    </insert>
+
+    <select id="getByName" resultType="com.lmandy.bean.AccountUser">
+        SELECT * FROM account_user WHERE userName = #{_paramter}
+    </select>
+
+    <select id="getByToken" resultType="com.lmandy.bean.AccountUser">
+        SELECT id,userName,token,portrait FROM account_user WHERE token = #{_paramter}
+    </select>
+
+</mapper>

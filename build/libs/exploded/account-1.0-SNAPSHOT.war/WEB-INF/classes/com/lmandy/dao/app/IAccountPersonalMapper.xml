@@ -1,0 +1,30 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!DOCTYPE mapper
+        PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.lmandy.dao.app.IAccountPersonalMapper">
+
+    <insert id="add" parameterType="com.lmandy.bean.AccountRecord" useGeneratedKeys="true" keyProperty="id">
+        INSERT INTO account_record VALUES (NULL,#{money},#{remarks},#{userId},#{sigle},#{createTime})
+    </insert>
+
+    <select id="getListByCommon" parameterType="com.lmandy.utils.PageBean" resultType="com.lmandy.bean.AccountRecord">
+        SELECT
+            r.*,
+            u.userName
+        FROM
+            account_record r
+        LEFT JOIN account_user u ON r.userId = u.id
+        WHERE 1=1
+
+        LIMIT ${pageNo},${pageSize}
+    </select>
+
+    <select id="getCountByCommon" parameterType="com.lmandy.utils.PageBean" resultType="java.lang.Integer">
+        SELECT
+           COUNT(1)
+        FROM
+            account_record r
+        WHERE 1=1
+    </select>
+</mapper>

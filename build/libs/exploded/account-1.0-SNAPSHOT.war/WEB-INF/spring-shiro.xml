@@ -1,0 +1,91 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<beans xmlns="http://www.springframework.org/schema/beans"
+       xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+       xsi:schemaLocation="http://www.springframework.org/schema/beans
+       http://www.springframework.org/schema/beans/spring-beans.xsd">
+
+    <!--shiro 对安全管理器 增强代码 ， spring 后处理器-->
+    <bean id="lifecycleBeanPostProcessor" class="org.apache.shiro.spring.LifecycleBeanPostProcessor"/>
+
+    <!-- 缓存管理 -->
+    <bean id="cacheManager" class="org.apache.shiro.cache.MemoryConstrainedCacheManager"/>
+
+    <!-- 可以使用Shiro自带的JdbcRealm类
+         指定密码匹配所需要用到的加密对象 指定存储用户、角色、权限许可的数据源及相关查询语句
+         这里我们使用自定义的realm类 accountRealm 注解自定义名称
+    -->
+
+
+    <!-- Shiro安全管理器 -->
+    <bean id="securityManager" class="org.apache.shiro.web.mgt.DefaultWebSecurityManager">
+        <property name="realm" ref="accountRealm"></property>
+        <property name="cacheManager" ref="cacheManager"></property>
+    </bean>
+
+    <!--
+       Shiro主过滤器本身功能十分强大，其强大之处就在于它支持任何基于URL路径表达式的、自定义的过滤器的执行
+       Web应用中，Shiro可控制的Web请求必须经过Shiro主过滤器的拦截，Shiro对基于Spring的Web应用提供了完美的支持
+    -->
+    <bean id="shiroFilter" class="org.apache.shiro.spring.web.ShiroFilterFactoryBean">
+        <!-- Shiro的核心安全接口，这个属性是必须的 -->
+        <property name="securityManager" ref="securityManager"></property>
+
+        <!-- (登录页面地址或登录页面的访问路径-这里shiro默认不拦截)，非必须的属性，默认会自动寻找Web工程根目录下的"/login.jsp"页面 -->
+        <property name="loginUrl" value="/login"></property>
+
+        <!-- 登录成功后要跳转的连接(本例中此属性用不到，因为登录成功后的处理逻辑在LoginController里硬编码) -->
+        <!-- <property name="successUrl" value="/index" ></property> -->
+
+        <!-- 用户访问未对其授权的资源时，所跳转的页面或者是该页面的访问路径 -->
+        <property name="unauthorizedUrl" value="/403"></property>
+
+        <property name="filterChainDefinitions">
+            <value>
+                <!--静态资源不需要认证-->
+                /bootstrap/**/* = anon
+                /css/**/* = anon
+                /js/**/* = anon
+                /img/**/* = anon
+
+                <!--登录不需要认证-->
+                /login = anon
+                <!--退出不需要认证-->
+                /logout = anon
+
+                /user/* = roles["admin"]
+                /role/* = roles["admin"]
+                /menu/* = roles["admin"]
+
+                /record/* = perms["person"]
+                /report/* = anyRoles["lisi,admin"]
+
+
+
+                <!--/nav = anon-->
+                <!--/top = anon-->
+
+                /** = authc
+            </value>
+        </property>
+    </bean>
+
+
+
+
+
+
+    <!--
+       开启Shiro的注解(如@RequiresRoles，@RequiresPermissions)，需借助SpringAOP扫描使用Shiro注解的类，
+       并在必要时进行安全逻辑验证
+    -->
+    <bean class="org.springframework.aop.framework.autoproxy.DefaultAdvisorAutoProxyCreator" depends-on="lifecycleBeanPostProcessor">
+
+        <!--使用cjlib 代理-->
+        <!--<property name="proxyTargetClass" value="true"></property>-->
+
+    </bean>
+    <bean class="org.apache.shiro.spring.security.interceptor.AuthorizationAttributeSourceAdvisor">
+        <property name="securityManager" ref="securityManager"></property>
+    </bean>
+
+</beans>

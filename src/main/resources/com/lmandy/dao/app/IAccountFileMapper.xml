@@ -1,0 +1,20 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!DOCTYPE mapper
+        PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.lmandy.dao.app.IAccountFileMapper">
+
+    <insert id="add" parameterType="com.lmandy.bean.AccountFile" useGeneratedKeys="true" keyProperty="id">
+        INSERT INTO account_file VALUES (NULL,#{name},#{size},#{path},#{token},#{createTime})
+    </insert>
+    <insert id="addFileRecordRelation" parameterType="com.lmandy.bean.AccountRecordFileRelation" useGeneratedKeys="true" keyProperty="id">
+        INSERT INTO account_recordfile_relation VALUES (NULL,#{fileId},#{recordId})
+    </insert>
+    <select id="getRecordFilesByRecordId">
+        SELECT
+            f.*
+        FROM account_recordfile_relation r
+        LEFT JOIN account_file f ON r.fileId = f.id
+        WHERE r.recordId = ${_parameter}
+    </select>
+</mapper>

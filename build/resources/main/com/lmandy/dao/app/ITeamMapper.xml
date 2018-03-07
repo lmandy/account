@@ -1,0 +1,69 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!DOCTYPE mapper
+        PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.lmandy.dao.app.ITeamMapper">
+
+    <insert id="add" parameterType="com.lmandy.bean.AccountTeam" useGeneratedKeys="true" keyProperty="id">
+        INSERT INTO account_file VALUES (NULL,#{name},#{createTime})
+    </insert>
+
+    <insert id="addTeamUserRelation" parameterType="com.lmandy.bean.AccountUserTeamRelation" useGeneratedKeys="true" keyProperty="id">
+        INSERT INTO account_file VALUES (NULL,#{userId},#{teamId},#{sign},1)
+    </insert>
+
+    <select id="getGroupsByUserId" resultType="com.lmandy.bean.AccountUserTeamRelation">
+        SELECT
+            t.`name`,
+            r.*,
+            u.userName
+        FROM account_userteam_relation r
+        LEFT JOIN account_team t ON r.teamId = t.id
+        LEFT JOIN account_user u ON r.userId = u.id
+        WHERE r.delSign = 1  r.userId = ${_parameter}
+    </select>
+    <insert id="addRecordTeamRelation" parameterType="com.lmandy.bean.AccountRecordTeamRelation">
+        insert into account_recordteam_relation
+        values (NULL,#{recordId},#{teamId});
+    </insert>
+    <update id="deleteUserFromGroup">
+      UPDATE account_userteam_relation
+        SET delSign = 0
+        WHERE
+            userId = ${userId}
+        AND teamId = ${teamId}
+    </update>
+
+    <select id="getListByCommonFromGroup" parameterType="com.lmandy.utils.PageBean" resultType="com.lmandy.bean.AccountRecord">
+        SELECT
+            rd.*,
+        u.userName
+        FROM account_team t
+        LEFT JOIN account_userteam_relation r ON t.id = r.teamId
+        LEFT JOIN account_record rd ON rd.userId = r.userId
+        LEFT JOIN account_user u ON u.id = rd.userId
+        WHERE 1=1
+        <if test="conMap.teamId !=null and conMap.teamId !=''">
+            t.id = ${conMap.teamId}
+        </if>
+        <if test="conMap.userId !=null and conMap.userId !=''">
+            r.userId = ${conMap.userId}
+        </if>
+        LIMIT ${pageNo},${pageSize}
+    </select>
+    <select id="getCountByCommonFromGroup" parameterType="com.lmandy.utils.PageBean" resultType="java.lang.Integer">
+        SELECT
+        COUNT(1)
+        FROM account_team t
+        LEFT JOIN account_userteam_relation r ON t.id = r.teamId
+        LEFT JOIN account_record rd ON rd.userId = r.userId
+        LEFT JOIN account_user u ON u.id = rd.userId
+        WHERE 1=1
+        <if test="conMap.teamId !=null and conMap.teamId !=''">
+            t.id = ${conMap.teamId}
+        </if>
+        <if test="conMap.userId !=null and conMap.userId !=''">
+            r.userId = ${conMap.userId}
+        </if>
+    </select>
+</mapper>
